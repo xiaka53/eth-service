@@ -65,8 +65,10 @@ func (n *newEthAddressStruct) set(address string) {
 }
 
 func GetNewAddress() (address string) {
+	var count int
 	newEthAddress.Mux.Lock()
 	newEthAddress.Count--
+	count = newEthAddress.Count
 	newEthAddress.Mux.Unlock()
 	address = <-newEthAddress.Chan
 	if err := (&dao.Address{Status: "N", Address: address}).Update(); err != nil {
@@ -75,5 +77,8 @@ func GetNewAddress() (address string) {
 	EthAddress.Mux.Lock()
 	EthAddress.Address[address] = true
 	EthAddress.Mux.Unlock()
+	if count <= 10 {
+		go (&newEthAddress).newAddress(20 - count)
+	}
 	return
 }
