@@ -67,7 +67,7 @@ func (a *EthV1) Send(from, to string, value, gas float64) (hash string, err erro
 }
 
 func (a *EthV1) Transfer(address string, amont, from int) []public.Transfer {
-	return (&Hash{Send: address}).Transfer(from, amont)
+	return (&Hash{Send: address}).Transfer(from-1, amont)
 }
 
 func (a *EthV1) EstimateGas(from, to string, value float64) float64 {

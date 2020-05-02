@@ -34,6 +34,6 @@ func (h *Hash) First(param string) error {
 
 func (h *Hash) Transfer(from, amort int) []public.Transfer {
 	var data []public.Transfer
-	public.SqlPool.Table(h.TableName()).Where("send=?", h.Send).Or("to=?", h.Send).Order("createtime desc").Limit(amort).Offset(from).Find(&data)
+	public.SqlPool.Table(h.TableName()).SetCtx(public.GetGinTraceContext(nil)).Where("send=? or `to`=?", h.Send, h.Send).Order("createtime desc").Limit(amort).Offset(from).Find(&data)
 	return data
 }
