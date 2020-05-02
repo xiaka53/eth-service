@@ -32,6 +32,12 @@ func (h *Hash) First(param string) error {
 	return public.SqlPool.Where(h).Order("blok_num desc").Select(param).First(h).Error
 }
 
+func (h *Hash) Hax(param string) public.Transfer {
+	var data public.Transfer
+	public.SqlPool.Where(h).Order("blok_num desc").Select(param).First(h)
+	return data
+}
+
 func (h *Hash) Transfer(from, amort int) []public.Transfer {
 	var data []public.Transfer
 	public.SqlPool.Table(h.TableName()).SetCtx(public.GetGinTraceContext(nil)).Where("send=? or `to`=?", h.Send, h.Send).Order("createtime desc").Limit(amort).Offset(from).Find(&data)

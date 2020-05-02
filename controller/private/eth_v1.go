@@ -21,6 +21,7 @@ func EthV1(router *gin.RouterGroup) {
 	router.POST("send", v.send)
 	router.GET("transfer", v.transfer)
 	router.GET("estimate_gas", v.estimate_gas)
+	router.GET("hax_log", v.hax_log)
 }
 
 // @Summary 获取新地址
@@ -130,4 +131,25 @@ func (v *v1) estimate_gas(c *gin.Context) {
 	}
 	gas = v.Eth.EstimateGas(param.From, param.To, param.Value)
 	middleware.ResponseSuccess(c, gas)
+}
+
+// @Summary 获取记录详情
+// @Tags 地址类
+// @Id 006
+// @Produce  json
+// @Param hax query string true "交易hax"
+// @Success 200 {string} string
+// @Router /v1/hax_log [get]
+func (v *v1) hax_log(c *gin.Context) {
+	var (
+		param dto.HaxLogValidateInput
+		data  public.Transfer
+		err   error
+	)
+	if err = (&param).BindingValidParams(c); err != nil {
+		middleware.ResponseError(c, middleware.ParameterError, err)
+		return
+	}
+	data = v.Eth.HaxLog(param.Hax)
+	middleware.ResponseSuccess(c, data)
 }

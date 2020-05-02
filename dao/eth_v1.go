@@ -89,3 +89,8 @@ func (a *EthV1) EstimateGas(from, to string, value float64) float64 {
 	}
 	return float64(gas) / math.Pow(10, 18)
 }
+
+func (a *EthV1) HaxLog(hax string) public.Transfer {
+	data := Hash{Hash: hax}
+	return (&data).Hax("*")
+}

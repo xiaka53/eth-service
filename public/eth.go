@@ -5,6 +5,7 @@ type Eth interface {
 	Send(string, string, float64, float64) (string, error)
 	Transfer(string, int, int) []Transfer
 	EstimateGas(string, string, float64) float64
+	HaxLog(string) Transfer
 }
 
 type Transfer struct {

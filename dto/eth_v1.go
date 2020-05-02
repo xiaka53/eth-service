@@ -111,3 +111,27 @@ func (o *EstimateGasValidateInput) BindingValidParams(c *gin.Context) (err error
 	}
 	return
 }
+
+type HaxLogValidateInput struct {
+	Hax float64 `form:"hax" json:"hax" validate:"min=0"`
+}
+
+func (o *HaxLogValidateInput) BindingValidParams(c *gin.Context) (err error) {
+	if err = c.ShouldBind(o); err != nil {
+		return
+	}
+	v := c.Value("trans")
+	trans, ok := v.(ut.Translator)
+	if !ok {
+		trans, _ = public.Uni.GetTranslator("en")
+	}
+	if err = public.Validate.Struct(o); err != nil {
+		errs := err.(validator.ValidationErrors)
+		sliceErrs := []string{}
+		for _, e := range errs {
+			sliceErrs = append(sliceErrs, e.Translate(trans))
+		}
+		return errors.New(strings.Join(sliceErrs, ","))
+	}
+	return
+}
