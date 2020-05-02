@@ -85,3 +85,29 @@ func (o *TransferValidateInput) BindingValidParams(c *gin.Context) (err error) {
 	}
 	return
 }
+
+type EstimateGasValidateInput struct {
+	From  string  `form:"from" json:"from" validate:"eth_addr"`
+	To    string  `form:"to" json:"to" validate:"eth_addr"`
+	Value float64 `form:"value" json:"value" validate:"min=0"`
+}
+
+func (o *EstimateGasValidateInput) BindingValidParams(c *gin.Context) (err error) {
+	if err = c.ShouldBind(o); err != nil {
+		return
+	}
+	v := c.Value("trans")
+	trans, ok := v.(ut.Translator)
+	if !ok {
+		trans, _ = public.Uni.GetTranslator("en")
+	}
+	if err = public.Validate.Struct(o); err != nil {
+		errs := err.(validator.ValidationErrors)
+		sliceErrs := []string{}
+		for _, e := range errs {
+			sliceErrs = append(sliceErrs, e.Translate(trans))
+		}
+		return errors.New(strings.Join(sliceErrs, ","))
+	}
+	return
+}

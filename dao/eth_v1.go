@@ -3,6 +3,7 @@ package dao
 import (
 	"context"
 	"errors"
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/xiaka53/eth-service/public"
@@ -67,4 +68,24 @@ func (a *EthV1) Send(from, to string, value, gas float64) (hash string, err erro
 
 func (a *EthV1) Transfer(address string, amont, from int) []public.Transfer {
 	return (&Hash{Send: address}).Transfer(from, amont)
+}
+
+func (a *EthV1) EstimateGas(from, to string, value float64) float64 {
+	client := public.GetEthclient()
+	defer client.Close()
+	value *= math.Pow(10, 18)
+	tohax := common.HexToAddress(to)
+	msg := ethereum.CallMsg{
+		From:     common.HexToAddress(from),
+		To:       &tohax,
+		Gas:      100000,
+		GasPrice: big.NewInt(10000000000),
+		Value:    big.NewInt(int64(value)),
+		Data:     nil,
+	}
+	gas, err := client.EstimateGas(context.Background(), msg)
+	if err != nil {
+		return 0
+	}
+	return float64(gas) / math.Pow(10, 18)
 }

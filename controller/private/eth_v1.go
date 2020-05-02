@@ -20,6 +20,7 @@ func EthV1(router *gin.RouterGroup) {
 	router.GET("get_balance", v.getBalance)
 	router.POST("send", v.send)
 	router.GET("transfer", v.transfer)
+	router.GET("estimate_gas", v.estimate_gas)
 }
 
 // @Summary 获取新地址
@@ -106,4 +107,27 @@ func (v *v1) transfer(c *gin.Context) {
 	}
 	data = v.Eth.Transfer(param.Address, param.Amount, param.From)
 	middleware.ResponseSuccess(c, data)
+}
+
+// @Summary 获取手续费
+// @Tags 地址类
+// @Id 005
+// @Produce  json
+// @Param from query string true "转账地址"
+// @Param to query string true "收款地址"
+// @Param value query string true "转出数量"
+// @Success 200 {string} string
+// @Router /v1/estimate_gas [get]
+func (v *v1) estimate_gas(c *gin.Context) {
+	var (
+		param dto.SendValidateInput
+		gas   float64
+		err   error
+	)
+	if err = (&param).BindingValidParams(c); err != nil {
+		middleware.ResponseError(c, middleware.ParameterError, err)
+		return
+	}
+	gas = v.Eth.EstimateGas(param.From, param.To, param.Value)
+	middleware.ResponseSuccess(c, gas)
 }
