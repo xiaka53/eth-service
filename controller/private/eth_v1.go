@@ -138,7 +138,7 @@ func (v *v1) estimate_gas(c *gin.Context) {
 // @Id 006
 // @Produce  json
 // @Param hax query string true "交易hax"
-// @Success 200 {string} string
+// @Success 200 {object} public.Transfer
 // @Router /v1/hax_log [get]
 func (v *v1) hax_log(c *gin.Context) {
 	var (

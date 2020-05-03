@@ -113,7 +113,7 @@ func (o *EstimateGasValidateInput) BindingValidParams(c *gin.Context) (err error
 }
 
 type HaxLogValidateInput struct {
-	Hax float64 `form:"hax" json:"hax" validate:"min=0"`
+	Hax string `form:"hax" json:"hax" validate:"min=0"`
 }
 
 func (o *HaxLogValidateInput) BindingValidParams(c *gin.Context) (err error) {

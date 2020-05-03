@@ -34,7 +34,7 @@ func (h *Hash) First(param string) error {
 
 func (h *Hash) Hax(param string) public.Transfer {
 	var data public.Transfer
-	public.SqlPool.Where(h).Order("blok_num desc").Select(param).First(h)
+	public.SqlPool.Table(h.TableName()).Where(h).Order("blok_num desc").Select(param).First(&data)
 	return data
 }
 
