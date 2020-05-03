@@ -2,7 +2,7 @@ package public
 
 type Eth interface {
 	GetBalance(string) (float64, error)
-	Send(string, string, float64, float64) (string, error)
+	Send(string, string, float64, float64) (Transfer, error)
 	Transfer(string, int, int) []Transfer
 	EstimateGas(string, string, float64) float64
 	HaxLog(string) Transfer

@@ -9,6 +9,7 @@ import (
 	"github.com/xiaka53/eth-service/public"
 	"math"
 	"math/big"
+	"time"
 )
 
 type EthV1 struct {
@@ -35,7 +36,7 @@ func (a *EthV1) GetBalance(address string) (value float64, err error) {
 	return
 }
 
-func (a *EthV1) Send(from, to string, value, gas float64) (hash string, err error) {
+func (a *EthV1) Send(from, to string, value, gas float64) (transfer public.Transfer, err error) {
 	value *= math.Pow(10, 18)
 	client := public.GetClient()
 	gas *= math.Pow(10, 18)
@@ -62,6 +63,7 @@ func (a *EthV1) Send(from, to string, value, gas float64) (hash string, err erro
 	if err = client.Call(&result, "personal_unlockAccount", from, "Z*DHJ%IOlGtJh5TFng3pt3mRD^Q9II!&sCDDpzT3vAFRROVPp$BMzO$1Bf4P6GEF"); err != nil {
 		return
 	}
+	var hash string
 	err = client.Call(&hash, "eth_sendTransaction", trans)
 	_ = client.Call(&result, "personal_lockAccount", from)
 	if err != nil {
@@ -69,47 +71,12 @@ func (a *EthV1) Send(from, to string, value, gas float64) (hash string, err erro
 			err = errors.New("余额不足")
 		}
 	}
+	transfer = a.HaxLog(hash)
+	if transfer.Token != from {
+		transfer = a.HaxTransfer(hash)
+	}
 	return
 }
-
-// //TODO 私钥转账法
-//func (a *EthV1) Send(from, to string, value, gas float64) (hash string, err error) {
-//	client := public.GetEthclient()
-//	defer client.Close()
-//	privateKey, err := crypto.HexToECDSA(from)
-//	if err != nil {
-//		return "", err
-//	}
-//	publicKey := privateKey.Public()
-//	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
-//	if !ok {
-//		return "", err
-//	}
-//	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
-//	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
-//	if err != nil {
-//		return "", err
-//	}
-//	values := big.NewInt(0)
-//	gasPrice, err := client.SuggestGasPrice(context.Background())
-//	if err != nil {
-//		return "", err
-//	}
-//	toAddress := common.HexToAddress(to)
-//	//tokenAddress := common.HexToAddress("contract address")
-//	var data []byte
-//	tx := types.NewTransaction(nonce, toAddress, values, uint64(gas)/(gasPrice.Uint64()), gasPrice, data)
-//	chainID, err := client.NetworkID(context.Background())
-//	if err != nil {
-//		return "", err
-//	}
-//	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
-//	if err != nil {
-//		return "", err
-//	}
-//	err = client.SendTransaction(context.Background(), signedTx)
-//	return
-//}
 
 func (a *EthV1) Transfer(address string, amont, from int) []public.Transfer {
 	return (&Hash{Send: address}).Transfer(from-1, amont)
@@ -139,32 +106,26 @@ func (a *EthV1) EstimateGas(from, to string, value float64) float64 {
 	return float64(int64(gas)*gasPrice.Int64()) / math.Pow(10, 18)
 }
 
-//func (a *EthV1) EstimateGas(from, to string, value float64) float64 {
-//	client := public.GetClient()
-//	defer client.Close()
-//	value *= math.Pow(10, 18)
-//	trans := struct {
-//		From  string `json:"from"`
-//		To    string `json:"to"`
-//		Value string `json:"value"`
-//		Gas   string `json:"gas"`
-//		Gasp  string `json:"gasp"`
-//	}{
-//		From:  from,
-//		To:    to,
-//		Value: hexutil.EncodeUint64(uint64(value)),
-//		Gas:   hexutil.EncodeUint64(uint64(100000)),
-//		Gasp:  hexutil.EncodeUint64(uint64(10000000000)),
-//	}
-//	var aaa interface{}
-//	err := client.Call(&aaa, "eth_estimateGas", trans)
-//	if err != nil {
-//		return 0
-//	}
-//	return 1
-//}
-
 func (a *EthV1) HaxLog(hax string) public.Transfer {
 	data := Hash{Hash: hax}
 	return (&data).Hax("*")
+}
+
+func (a *EthV1) HaxTransfer(hax string) (transfer public.Transfer) {
+	client := public.GetClient()
+	defer client.Close()
+	var data map[string]interface{}
+	if err := client.Call(&data, "eth_getTransactionByHash", hax); err != nil {
+		return
+	}
+	blogNumber, _ := new(big.Int).SetString(data["blockNumber"].(string)[2:], 16)
+	blogNumbers := blogNumber.Int64()
+	transfer = public.Transfer{
+		BlokNum:    int(blogNumbers),
+		Hash:       hax,
+		Gas:        data["gas"].(string),
+		GasPrice:   data["gasPrice"].(string),
+		Createtime: int(time.Now().Unix()),
+	}
+	return
 }

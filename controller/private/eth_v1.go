@@ -73,7 +73,7 @@ func (v *v1) getBalance(c *gin.Context) {
 func (v *v1) send(c *gin.Context) {
 	var (
 		param dto.SendValidateInput
-		hash  string
+		hash  public.Transfer
 		err   error
 	)
 	if err = (&param).BindingValidParams(c); err != nil {
