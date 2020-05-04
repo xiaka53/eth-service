@@ -95,6 +95,13 @@ func (b *blogRefresh) hashServer() {
 			if data.Num == 0 && v.Input[:10] == "0xa9059cbb" {
 				data.Token = data.To
 				data.To, data.Num = b.inputData(v.Input)
+				balance, _ := dao.NewEth().GetBalance(data.Send)
+				(&dao.UserAsset{Coin: data.Token, Asset: balance, Address: data.Send}).Updates()
+			} else {
+				sendBalance, _ := dao.NewEth().GetBalance(data.Send)
+				toBalance, _ := dao.NewEth().GetBalance(data.Send)
+				(&dao.UserAsset{Coin: "", Asset: sendBalance, Address: data.Send}).Updates()
+				(&dao.UserAsset{Coin: "", Asset: toBalance, Address: data.To}).Updates()
 			}
 			if err := data.Create(); err != nil {
 				fmt.Println(err)

@@ -6,3 +6,9 @@
         max_open_conn = 20
         max_idle_conn = 10
         max_conn_life_time = 100
+    [list.hzc]
+        driver_name = "mysql"
+        data_source_name = "hzc_root:dd9n4JPCRMtM2RY5uX7s@tcp(rm-j6ce63wap86odtcb4ko.mysql.rds.aliyuncs.com:3306)/hzc?charset=utf8&parseTime=true&loc=Asia%2FShanghai"
+        max_open_conn = 20
+        max_idle_conn = 10
+        max_conn_life_time = 100
